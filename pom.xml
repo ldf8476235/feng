@@ -8,6 +8,8 @@
         <module>common</module>
         <module>tgball</module>
         <module>vx</module>
+        <module>../opinion/opinion</module>
+        <module>op</module>
     </modules>
     <parent>
         <groupId>org.springframework.boot</groupId>
