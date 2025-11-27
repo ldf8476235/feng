@@ -34,9 +34,13 @@ public class Test {
 
     @PostMapping("/getData")
     public String getData(@RequestBody WalletRequest request) {
-        List<String> wallets = request == null
-                ? new ArrayList<>()
-                : Objects.requireNonNullElse(request.getWallets(), new ArrayList<>());
+        List<String> wallets;
+        if (request != null && request.getWallets() != null) {
+            wallets = request.getWallets();
+        } else {
+            wallets = new ArrayList<>();
+        }
+
         List<Future<?>> futures = new ArrayList<>();
 
         for (String wallet : wallets) {
