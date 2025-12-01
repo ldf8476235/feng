@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yyds.feng.op.mapper.WalletWeeklySnapshotMapper">
+
+    <insert id="insertBatch">
+        INSERT INTO wallet_weekly_snapshot (
+        wallet, week_no,
+        total_volume, total_net_worth, total_points, total_portfolio,
+        delta_volume, delta_net_worth, delta_points, delta_portfolio,
+        snapshot_time
+        ) VALUES
+        <foreach collection="list" item="item" separator=",">
+            (
+            #{item.wallet},
+            #{item.weekNo},
+            #{item.totalVolume},
+            #{item.totalNetWorth},
+            #{item.totalPoints},
+            #{item.totalPortfolio},
+
+            #{item.deltaVolume},
+            #{item.deltaNetWorth},
+            #{item.deltaPoints},
+            #{item.deltaPortfolio},
+
+            #{item.snapshotTime}
+            )
+        </foreach>
+    </insert>
+
+
+</mapper>
