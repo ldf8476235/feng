@@ -31,3 +31,21 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Logs ###
+logs/
+*.log
+
+### macOS ###
+.DS_Store
+*/.DS_Store
+
+### Environment & Secrets ###
+*.env
+application-local.yml
+application-prod.yml
+
+### Temp files ###
+*.tmp
+*.bak
+*.swp

@@ -3,8 +3,6 @@ package com.yyds.feng.op.config;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.yyds.feng.common.entity.ProxyInfo;
 import com.yyds.feng.op.mapper.ProxyMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -15,7 +13,7 @@ public class ProxyPool {
     private final ProxyMapper proxyMapper;
     private final List<ProxyInfo> proxyList = new CopyOnWriteArrayList<>();
 
-    @Autowired
+//    @Autowired
     public ProxyPool(ProxyMapper proxyMapper) {
         this.proxyMapper = proxyMapper;
         refresh();

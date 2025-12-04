@@ -1,6 +1,5 @@
 package com.yyds.feng.op.service;
 
-
 import com.yyds.feng.op.mapper.WalletAddressMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +25,7 @@ public class WalletStoreService {
     private final ConcurrentLinkedQueue<String> walletQueue = new ConcurrentLinkedQueue<>();
 
     // 批处理参数
-    private static final int BATCH_SIZE = 100;   // 满 100 条就批量写入
+    private static final int BATCH_SIZE = 100; // 满 100 条就批量写入
     private static final int FLUSH_INTERVAL = 60; // 每 1s 检查一次
 
     // ============================
@@ -43,7 +42,7 @@ public class WalletStoreService {
     public void addWalletAsync(String wallet) {
         String redisKey = "wallet:address:" + wallet.toLowerCase();
 
-        Boolean firstSeen = redis.opsForValue().setIfAbsent(redisKey, "1");
+        Boolean firstSeen = redis.opsForValue().setIfAbsent(redisKey, "1", 7, TimeUnit.DAYS);
         if (Boolean.FALSE.equals(firstSeen)) {
             return; // 已存在，不入队列
         }
@@ -67,16 +66,16 @@ public class WalletStoreService {
             }
         }
 
-        if (batch.isEmpty()) return;
+        if (batch.isEmpty())
+            return;
 
         try {
             int rows = walletAddressMapper.insertBatch(batch);
-            log.info("批量入库 {} 条钱包（成功 {} 条）", batch.size(), rows);
+            // log.info("批量入库 {} 条钱包（成功 {} 条）", batch.size(), rows);
         } catch (Exception e) {
-            log.error("批量入库失败：{}", e.getMessage());
+            log.error("insert wallet error：{}", e.getMessage());
         }
     }
-
 
     public void storeWallet(String wallet) {
 
@@ -92,7 +91,7 @@ public class WalletStoreService {
             // ================================
             // 1. Redis 去重（SETNX）
             // ================================
-            Boolean firstSeen = redis.opsForValue().setIfAbsent(redisKey, "1");
+            Boolean firstSeen = redis.opsForValue().setIfAbsent(redisKey, "1", 7, TimeUnit.DAYS);
 
             if (Boolean.FALSE.equals(firstSeen)) {
                 // Redis 已经存在 → 不入库

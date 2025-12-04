@@ -21,9 +21,9 @@
 
     <!-- 普通业务日志，按天分割 -->
     <appender name="APP_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${LOG_HOME}/op.log</file>
+        <file>${LOG_HOME}/alpha.log</file>
         <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${LOG_HOME}/op.%d{yyyy-MM-dd}.log.gz</fileNamePattern>
+            <fileNamePattern>${LOG_HOME}/alpha.%d{yyyy-MM-dd}.log.gz</fileNamePattern>
             <maxHistory>15</maxHistory>
         </rollingPolicy>
 
@@ -53,7 +53,7 @@
 
     <!-- 根日志 -->
     <root level="INFO">
-<!--        <appender-ref ref="CONSOLE"/>-->
+        <appender-ref ref="CONSOLE"/>
         <appender-ref ref="APP_FILE"/>
         <appender-ref ref="ERROR_FILE"/>
     </root>

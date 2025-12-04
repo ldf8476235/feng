@@ -8,6 +8,7 @@
         <module>tgball</module>
         <module>vx</module>
         <module>op</module>
+        <module>alpha</module>
     </modules>
     <parent>
         <groupId>org.springframework.boot</groupId>
@@ -36,11 +37,11 @@
             <scope>test</scope>
         </dependency>
 
+
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-devtools</artifactId>
-            <version>1.5.16.RELEASE</version>
-            <!-- 启用 -->
+            <scope>runtime</scope>
             <optional>true</optional>
         </dependency>
 

@@ -4,6 +4,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.yyds.feng.common.entity.WalletAddress;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
@@ -17,6 +18,8 @@ public interface WalletAddressMapper extends BaseMapper<WalletAddress> {
 
     @Select("SELECT wallet FROM wallet_address")
     List<String> selectAllWallets();
+
+    List<String> selectWalletByNoStat(@Param("week") Integer week);
 
     int insertBatch(List<String> wallets);
 }

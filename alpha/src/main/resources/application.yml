@@ -1,6 +1,8 @@
+server:
+  port: 8082
+  servlet:
+    context-path: /alpha
 spring:
-  profiles:
-    active: web
   config:
     import: classpath:common.yml
   redis:
@@ -14,7 +16,11 @@ spring:
     password: Wsldf981126
     driver-class-name: com.mysql.cj.jdbc.Driver
 
-    # MyBatis Plus 配置（可选）
+  # 确保启用 web 环境
+  main:
+    web-application-type: servlet
+
+# MyBatis Plus 配置（可选）
 mybatis-plus:
   mapper-locations: classpath*:mapper/**/*.xml
   configuration:
@@ -22,3 +28,5 @@ mybatis-plus:
 
 bsc:
   rpc-url: https://1rpc.io/bnb
+
+# 确保服务器配置正确
