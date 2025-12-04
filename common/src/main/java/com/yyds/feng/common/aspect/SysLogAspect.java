@@ -24,44 +24,44 @@ import java.lang.reflect.Method;
 @Component
 public class SysLogAspect {
 
+    // @Pointcut("execution(* com.ec.cies.controller.*.*(..))")
+    // public void logPointCut() {
+    //
+    // }
 
-//    @Pointcut("execution(* com.ec.cies.controller.*.*(..))")
-//    public void logPointCut() {
-//
-//    }
+    // @Pointcut("@annotation(io.swagger.annotations.ApiOperation)")
+    // public void logPointCut() {
+    //
+    // }
 
-//    @Pointcut("@annotation(io.swagger.annotations.ApiOperation)")
-//    public void logPointCut() {
-//
-//    }
-
-//    @Around("logPointCut()")
-//    public Object around(ProceedingJoinPoint point) throws Throwable {
-//        log.info("<-----------Start----------->");
-//        MethodSignature signature = (MethodSignature) point.getSignature();
-//        String userName = "feng";
-//        log.info("user:"+ userName);
-//        HttpServletRequest httpServletRequest = HttpContextUtils.getHttpServletRequest();
-//        log.info("IP:"+ HttpContextUtils.getIPAddress());
-//        log.info("url:"+ httpServletRequest.getRequestURI());
-//        Method method = signature.getMethod();
-//        Object[] args = point.getArgs();
-//        try{
-//            String params = new Gson().toJson(args);
-//            log.info("args:"+ params);
-//        }catch (Exception e){
-//
-//        }
-//        //执行方法
-//        long beginTime = System.currentTimeMillis();
-//        Object result = point.proceed();
-//        long time = System.currentTimeMillis() - beginTime;
-//        if(result.toString().length()<1000){
-//            log.info("return args:" + result.toString());
-//        }else{
-//            log.info("return args length:" + result.toString().length());
-//        }
-//        log.info("<---------End("+time+"ms)--------->",time);
-//        return result;
-//    }
+    // @Around("logPointCut()")
+    // public Object around(ProceedingJoinPoint point) throws Throwable {
+    // log.info("<-----------Start----------->");
+    // MethodSignature signature = (MethodSignature) point.getSignature();
+    // String userName = "feng";
+    // log.info("user:"+ userName);
+    // HttpServletRequest httpServletRequest =
+    // HttpContextUtils.getHttpServletRequest();
+    // log.info("IP:"+ HttpContextUtils.getIPAddress());
+    // log.info("url:"+ httpServletRequest.getRequestURI());
+    // Method method = signature.getMethod();
+    // Object[] args = point.getArgs();
+    // try{
+    // String params = new Gson().toJson(args);
+    // log.info("args:"+ params);
+    // }catch (Exception e){
+    //
+    // }
+    // //执行方法
+    // long beginTime = System.currentTimeMillis();
+    // Object result = point.proceed();
+    // long time = System.currentTimeMillis() - beginTime;
+    // if(result.toString().length()<1000){
+    // log.info("return args:" + result.toString());
+    // }else{
+    // log.info("return args length:" + result.toString().length());
+    // }
+    // log.info("<---------End("+time+"ms)--------->",time);
+    // return result;
+    // }
 }

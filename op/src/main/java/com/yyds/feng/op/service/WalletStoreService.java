@@ -42,7 +42,7 @@ public class WalletStoreService {
     public void addWalletAsync(String wallet) {
         String redisKey = "wallet:address:" + wallet.toLowerCase();
 
-        Boolean firstSeen = redis.opsForValue().setIfAbsent(redisKey, "1", 7, TimeUnit.DAYS);
+        Boolean firstSeen = redis.opsForValue().setIfAbsent(redisKey, "1");
         if (Boolean.FALSE.equals(firstSeen)) {
             return; // 已存在，不入队列
         }
@@ -91,7 +91,7 @@ public class WalletStoreService {
             // ================================
             // 1. Redis 去重（SETNX）
             // ================================
-            Boolean firstSeen = redis.opsForValue().setIfAbsent(redisKey, "1", 7, TimeUnit.DAYS);
+            Boolean firstSeen = redis.opsForValue().setIfAbsent(redisKey, "1");
 
             if (Boolean.FALSE.equals(firstSeen)) {
                 // Redis 已经存在 → 不入库
