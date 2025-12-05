@@ -3,7 +3,7 @@
 # ================= 配置信息 =================
 HOST="198.46.175.142"
 USER="root"
-PASS="57zVTrYhkK9cv9L4E6"
+PASS="Wsldf981126"
 REMOTE_DIR="/usr/local/lee"
 JAR_NAME="op-0.0.1-SNAPSHOT.jar"
 LOCAL_JAR_PATH="op/target/$JAR_NAME"
