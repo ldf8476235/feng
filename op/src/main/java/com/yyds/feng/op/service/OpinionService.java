@@ -70,7 +70,7 @@ public class OpinionService {
         return result;
     }
 
-    private static final int MAX_RETRIES = 2;
+    private static final int MAX_RETRIES = 3;
     private static final int RETRY_DELAY_MS = 500;
 
     /**
