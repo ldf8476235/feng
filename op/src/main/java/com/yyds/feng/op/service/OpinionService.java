@@ -70,6 +70,31 @@ public class OpinionService {
         return result;
     }
 
+    private static final int MAX_RETRIES = 2;
+    private static final int RETRY_DELAY_MS = 500;
+
+    /**
+     * 带重试的 HTTP GET 请求
+     */
+    private String fetchWithRetry(String url) {
+        for (int attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+            try {
+                return restTemplate.getForObject(url, String.class);
+            } catch (Exception e) {
+                log.warn("请求失败 (第 {} 次尝试): {} - {}", attempt, url, e.getMessage());
+                if (attempt < MAX_RETRIES) {
+                    try {
+                        Thread.sleep(RETRY_DELAY_MS);
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                        break;
+                    }
+                }
+            }
+        }
+        return null;
+    }
+
     public JSONObject fetchWalletBatchWeb(String wallet) {
 
         JSONObject userDetail = new JSONObject();
@@ -96,14 +121,16 @@ public class OpinionService {
             String url = "https://proxy.opinion.trade:8443/api/bsc/api/v2/leaderboard/"
                     + wallet + "?dataType=points&chainId=56";
 
-            String resp = restTemplate.getForObject(url, String.class);
-            JSONObject obj = JSONObject.parseObject(resp).getJSONObject("result");
+            String resp = fetchWithRetry(url);
+            if (resp != null) {
+                JSONObject obj = JSONObject.parseObject(resp).getJSONObject("result");
 
-            if (obj != null) {
-                BigDecimal points = new BigDecimal(obj.getString("rankingValue"))
-                        .setScale(3, RoundingMode.HALF_UP);
+                if (obj != null) {
+                    BigDecimal points = new BigDecimal(obj.getString("rankingValue"))
+                            .setScale(3, RoundingMode.HALF_UP);
 
-                userDetail.put("totalPoints", points);
+                    userDetail.put("totalPoints", points);
+                }
             }
         } catch (Exception ignore) {
         }
@@ -117,33 +144,35 @@ public class OpinionService {
             String url = "https://proxy.opinion.trade:8443/api/bsc/api/v2/user/"
                     + wallet + "/profile?&chainId=56";
 
-            String resp = restTemplate.getForObject(url, String.class);
-            JSONObject obj = JSONObject.parseObject(resp).getJSONObject("result");
+            String resp = fetchWithRetry(url);
+            if (resp != null) {
+                JSONObject obj = JSONObject.parseObject(resp).getJSONObject("result");
 
-            if (obj != null) {
+                if (obj != null) {
 
-                userDetail.put("netWorth",
-                        new BigDecimal(obj.getString("netWorth"))
-                                .setScale(2, RoundingMode.HALF_UP));
+                    userDetail.put("netWorth",
+                            new BigDecimal(obj.getString("netWorth"))
+                                    .setScale(2, RoundingMode.HALF_UP));
 
-                userDetail.put("totalVolume",
-                        new BigDecimal(obj.getString("Volume"))
-                                .setScale(2, RoundingMode.HALF_UP));
+                    userDetail.put("totalVolume",
+                            new BigDecimal(obj.getString("Volume"))
+                                    .setScale(2, RoundingMode.HALF_UP));
 
-                JSONObject balance = obj.getJSONArray("balance").getJSONObject(0);
-                userDetail.put("availableBalance",
-                        new BigDecimal(balance.getString("totalBalance"))
-                                .setScale(2, RoundingMode.HALF_UP));
+                    JSONObject balance = obj.getJSONArray("balance").getJSONObject(0);
+                    userDetail.put("availableBalance",
+                            new BigDecimal(balance.getString("totalBalance"))
+                                    .setScale(2, RoundingMode.HALF_UP));
 
-                userDetail.put("userName", obj.getString("userName"));
+                    userDetail.put("userName", obj.getString("userName"));
 
-                userDetail.put("totalProfit",
-                        new BigDecimal(obj.getString("totalProfit"))
-                                .setScale(2, RoundingMode.HALF_UP));
+                    userDetail.put("totalProfit",
+                            new BigDecimal(obj.getString("totalProfit"))
+                                    .setScale(2, RoundingMode.HALF_UP));
 
-                userDetail.put("totalPortfolio",
-                        new BigDecimal(obj.getString("portfolio"))
-                                .setScale(2, RoundingMode.HALF_UP));
+                    userDetail.put("totalPortfolio",
+                            new BigDecimal(obj.getString("portfolio"))
+                                    .setScale(2, RoundingMode.HALF_UP));
+                }
             }
         } catch (Exception ignore) {
         }
@@ -165,16 +194,18 @@ public class OpinionService {
                 String url = "https://proxy.opinion.trade:8443/api/bsc/api/v2/leaderboard/"
                         + wallet + "?dataType=points&chainId=56&period=7";
 
-                String resp = restTemplate.getForObject(url, String.class);
-                JSONObject obj = JSONObject.parseObject(resp).getJSONObject("result");
+                String resp = fetchWithRetry(url);
+                if (resp != null) {
+                    JSONObject obj = JSONObject.parseObject(resp).getJSONObject("result");
 
-                if (obj != null) {
-                    BigDecimal points = new BigDecimal(obj.getString("rankingValue"))
-                            .setScale(3, RoundingMode.HALF_UP);
+                    if (obj != null) {
+                        BigDecimal points = new BigDecimal(obj.getString("rankingValue"))
+                                .setScale(3, RoundingMode.HALF_UP);
 
-                    userDetail.put("lastPoint", points);
-                    redisTemplate.opsForHash().put(keyLast, "deltaPoint", points.toString());
-                    redisTemplate.expire(keyLast, 7, TimeUnit.DAYS);
+                        userDetail.put("lastPoint", points);
+                        redisTemplate.opsForHash().put(keyLast, "deltaPoint", points.toString());
+                        redisTemplate.expire(keyLast, 7, TimeUnit.DAYS);
+                    }
                 }
             }
         } catch (Exception ignore) {
@@ -197,33 +228,39 @@ public class OpinionService {
                 }
             }
             if (needFetch) {
-                resp = restTemplate.getForObject(url, String.class);
-                JSONObject obj = JSONObject.parseObject(resp).getJSONObject("result");
-                BigDecimal lastWeekVolume = calcLastWeekVolume(obj);
-                userDetail.put("lastVolume", lastWeekVolume);
-                redisTemplate.opsForHash().put(keyLast, "deltaVolume", lastWeekVolume.toString());
+                resp = fetchWithRetry(url);
+                if (resp != null) {
+                    JSONObject obj = JSONObject.parseObject(resp).getJSONObject("result");
+                    BigDecimal lastWeekVolume = calcLastWeekVolume(obj);
+                    userDetail.put("lastVolume", lastWeekVolume);
+                    redisTemplate.opsForHash().put(keyLast, "deltaVolume", lastWeekVolume.toString());
 
-                BigDecimal lastWeekProfit = calcLastWeekProfit(obj);
-                userDetail.put("lastProfit", lastWeekProfit);
-                redisTemplate.opsForHash().put(keyLast, "deltaProfit", lastWeekProfit.toString());
-                redisTemplate.expire(keyLast, 7, TimeUnit.DAYS);
+                    BigDecimal lastWeekProfit = calcLastWeekProfit(obj);
+                    userDetail.put("lastProfit", lastWeekProfit);
+                    redisTemplate.opsForHash().put(keyLast, "deltaProfit", lastWeekProfit.toString());
+                    redisTemplate.expire(keyLast, 7, TimeUnit.DAYS);
+                } else {
+                    resp = "";
+                }
             }
         } catch (Exception ignore) {
         }
         // 本周
         if (!needFetch) {
-            try {
-                resp = restTemplate.getForObject(url, String.class);
-            } catch (Exception e) {
+            String fetchedResp = fetchWithRetry(url);
+            if (fetchedResp != null) {
+                resp = fetchedResp;
             }
         }
         try {
-            JSONObject obj = JSONObject.parseObject(resp).getJSONObject("result");
-            BigDecimal thisWeekVolume = calcThisWeekVolume(obj);
-            userDetail.put("thisVolume", thisWeekVolume);
+            if (resp != null && !resp.isEmpty()) {
+                JSONObject obj = JSONObject.parseObject(resp).getJSONObject("result");
+                BigDecimal thisWeekVolume = calcThisWeekVolume(obj);
+                userDetail.put("thisVolume", thisWeekVolume);
 
-            BigDecimal thisWeekProfit = calcThisWeekProfit(obj);
-            userDetail.put("thisProfit", thisWeekProfit);
+                BigDecimal thisWeekProfit = calcThisWeekProfit(obj);
+                userDetail.put("thisProfit", thisWeekProfit);
+            }
         } catch (Exception ignore) {
 
         }
