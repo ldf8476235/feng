@@ -27,6 +27,8 @@ public class ReportController {
         report.setSource(req.getSource());
         report.setBalance(req.getBalance());
         report.setAirdrop(req.getAirdrop());
+        // 透传前端指定的日期（如未传则在 service 中填充当天）
+        report.setReportDate(req.getReportDate());
 
         reportService.saveReport(report);
 
