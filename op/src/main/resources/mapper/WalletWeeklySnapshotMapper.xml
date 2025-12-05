@@ -7,24 +7,16 @@
     <insert id="insertBatch">
         INSERT INTO wallet_weekly_snapshot (
         wallet, week_no,
-        total_volume, total_net_worth, total_points, total_portfolio,
-        delta_volume, delta_net_worth, delta_points, delta_portfolio,
+        delta_volume, delta_points, delta_profit,
         snapshot_time
         ) VALUES
         <foreach collection="list" item="item" separator=",">
             (
             #{item.wallet},
             #{item.weekNo},
-            #{item.totalVolume},
-            #{item.totalNetWorth},
-            #{item.totalPoints},
-            #{item.totalPortfolio},
-
             #{item.deltaVolume},
-            #{item.deltaNetWorth},
             #{item.deltaPoints},
-            #{item.deltaPortfolio},
-
+            #{item.deltaProfit},
             #{item.snapshotTime}
             )
         </foreach>

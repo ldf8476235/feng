@@ -15,7 +15,7 @@
             w.wallet
         FROM
             wallet_address w
-                LEFT JOIN wallet_weekly_snapshot sn ON w.wallet = sn.wallet AND sn.week_no = {week}
+                LEFT JOIN wallet_weekly_snapshot sn ON w.wallet = sn.wallet AND sn.week_no = #{week}
         WHERE
             sn.id IS NULL
     </select>
