@@ -347,23 +347,43 @@ public class OpinionService {
 
         log.info("Calling OP third-party -> {}", url);
 
-        try {
-            // 发送 GET
-            String resp = restTemplate.getForObject(url, String.class);
+        int maxRetries = 2;
+        Exception lastException = null;
 
-            if (resp == null) {
-                log.error("OP API returned null");
-                return Collections.emptyList();
+        for (int attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+                // 发送 GET
+                String resp = restTemplate.getForObject(url, String.class);
+
+                if (resp == null) {
+                    log.error("OP API returned null");
+                    return Collections.emptyList();
+                }
+
+                // 解析 JSON
+                JSONObject json = JSONObject.parseObject(resp);
+
+                return json;
+
+            } catch (Exception e) {
+                lastException = e;
+                log.warn("OP API 请求失败 (第 {} 次尝试): {}", attempt, e.getMessage());
+                if (attempt < maxRetries) {
+                    try {
+                        Thread.sleep(500); // 等待 500ms 后重试
+                    } catch (InterruptedException ie) {
+                        Thread.currentThread().interrupt();
+                    }
+                }
             }
-
-            // 解析 JSON
-            JSONObject json = JSONObject.parseObject(resp);
-
-            return json;
-
-        } catch (Exception e) {
-            log.error("Error calling OP API: {}", e.getMessage(), e);
-            return Collections.emptyList();
         }
+
+        if (lastException != null) {
+            log.error("Error calling OP API after {} retries: {}", maxRetries, lastException.getMessage(),
+                    lastException);
+        } else {
+            log.error("Error calling OP API after {} retries, but no exception captured", maxRetries);
+        }
+        return Collections.emptyList();
     }
 }
