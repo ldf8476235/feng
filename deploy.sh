@@ -9,13 +9,25 @@ JAR_NAME="op-0.0.1-SNAPSHOT.jar"
 LOCAL_JAR_PATH="op/target/$JAR_NAME"
 # ===========================================
 
-# 1. 检查本地文件是否存在
+# 1. Maven 打包
+echo "📦 [1/3] 正在执行 Maven 打包..."
+
+mvn package -f op/pom.xml -DskipTests
+
+if [ $? -ne 0 ]; then
+  echo "❌ [Error] Maven 打包失败！"
+  exit 1
+fi
+
+echo "✅ Maven 打包成功"
+
+# 2. 检查本地文件是否存在
 if [ ! -f "$LOCAL_JAR_PATH" ]; then
   echo "❌ [Error] 找不到文件: $LOCAL_JAR_PATH"
   exit 1
 fi
 
-echo "📤 [1/2] 正在上传 Jar 包到服务器..."
+echo "📤 [2/3] 正在上传 Jar 包到服务器..."
 
 sshpass -p "$PASS" scp -o StrictHostKeyChecking=no "$LOCAL_JAR_PATH" $USER@$HOST:$REMOTE_DIR/
 
@@ -24,7 +36,7 @@ if [ $? -ne 0 ]; then
   exit 1
 fi
 
-echo "🔄 [2/2] 正在远程重启服务..."
+echo "🔄 [3/3] 正在远程重启服务..."
 
 sshpass -p "$PASS" ssh -o StrictHostKeyChecking=no $USER@$HOST "cd $REMOTE_DIR && chmod +x restart.sh && ./restart.sh"
 
