@@ -62,7 +62,8 @@ public class ReportController {
         uniqueUsers.addAll(defaultSourceMap.keySet());
         
         // 计算过去15天的日期列表
-        LocalDate today = LocalDate.now();
+        // 过去15天，不包含今天
+        LocalDate today = LocalDate.now().minusDays(1);
         List<LocalDate> last15Days = new ArrayList<>();
         for (int i = 14; i >= 0; i--) {
             last15Days.add(today.minusDays(i));

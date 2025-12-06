@@ -12,7 +12,7 @@ LOCAL_JAR_PATH="op/target/$JAR_NAME"
 # 1. Maven 打包
 echo "📦 [1/3] 正在执行 Maven 打包..."
 
-mvn package -f op/pom.xml -DskipTests
+mvn -s /usr/local/maven/conf/settings.xml package -f op/pom.xml -DskipTests
 
 if [ $? -ne 0 ]; then
   echo "❌ [Error] Maven 打包失败！"
