@@ -1,6 +1,8 @@
 package com.yyds.feng.alpha.controller;
 
+import com.yyds.feng.alpha.entity.UserDefaultSource;
 import com.yyds.feng.alpha.entity.UserScoreReport;
+import com.yyds.feng.alpha.service.UserDefaultSourceService;
 import com.yyds.feng.alpha.service.UserScoreReportService;
 import com.yyds.feng.common.util.R;
 import lombok.Data;
@@ -18,6 +20,9 @@ public class ReportController {
 
     @Resource
     private UserScoreReportService reportService;
+
+    @Resource
+    private UserDefaultSourceService userDefaultSourceService;
 
     @PostMapping("/report")
     public R report(@RequestBody ReportRequest req) {
@@ -39,12 +44,22 @@ public class ReportController {
     public R getData() {
         // 查询所有数据
         List<UserScoreReport> reports = reportService.getAllReports();
+
+        // 查询用户自定义默认分数
+        Map<String, Integer> defaultSourceMap = userDefaultSourceService.listAll()
+                .stream()
+                .filter(item -> item.getUsername() != null)
+                .collect(Collectors.toMap(
+                        item -> item.getUsername().trim(),
+                        UserDefaultSource::getDefaultSource,
+                        (existing, replacement) -> existing));
         
         // 获取所有唯一用户名
         Set<String> uniqueUsers = reports.stream()
                 .map(UserScoreReport::getUsername)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toSet());
+        uniqueUsers.addAll(defaultSourceMap.keySet());
         
         // 计算过去15天的日期列表
         LocalDate today = LocalDate.now();
@@ -72,6 +87,7 @@ public class ReportController {
             
             List<UserInfo> userInfoList = new ArrayList<>();
             for (String username : uniqueUsers) {
+                Integer defaultSource = defaultSourceMap.getOrDefault(username, 17);
                 String key = dateStr + "_" + username;
                 UserScoreReport report = reportMap.get(key);
                 
@@ -80,11 +96,11 @@ public class ReportController {
                 
                 if (report != null) {
                     // 使用实际数据
-                    userInfo.setSource(report.getSource() != null ? report.getSource() : 18);
+                    userInfo.setSource(report.getSource() != null ? report.getSource() : defaultSource);
                     userInfo.setBalance(report.getBalance() != null ? report.getBalance() : 0.0);
                 } else {
                     // 补全默认数据
-                    userInfo.setSource(18);
+                    userInfo.setSource(defaultSource);
                     userInfo.setBalance(0.0);
                 }
                 
@@ -96,6 +112,29 @@ public class ReportController {
         }
         
         return R.ok(result);
+    }
+
+    @PostMapping("/saveSource")
+    public R saveSource(@RequestBody SourceRequest req) {
+        if (req == null || req.getUsername() == null || req.getUsername().trim().isEmpty()) {
+            return R.error("username不能为空");
+        }
+        if (req.getDefaultSource() == null) {
+            return R.error("defaultSource不能为空");
+        }
+
+        UserDefaultSource source = new UserDefaultSource();
+        source.setUsername(req.getUsername());
+        source.setDefaultSource(req.getDefaultSource());
+
+        userDefaultSourceService.saveDefaultSource(source);
+        return R.ok();
+    }
+
+    @GetMapping("/getSource")
+    public R getSource() {
+        List<UserDefaultSource> sources = userDefaultSourceService.listAll();
+        return R.ok(sources);
     }
     
     @Data
@@ -118,5 +157,11 @@ public class ReportController {
         private String user;
         private Integer source;
         private Double balance;
+    }
+
+    @Data
+    public static class SourceRequest {
+        private String username;
+        private Integer defaultSource;
     }
 }
