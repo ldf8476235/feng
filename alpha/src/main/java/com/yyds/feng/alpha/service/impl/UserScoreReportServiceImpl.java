@@ -11,6 +11,8 @@ import javax.annotation.Resource;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 @Service
 public class UserScoreReportServiceImpl implements UserScoreReportService {
@@ -50,5 +52,22 @@ public class UserScoreReportServiceImpl implements UserScoreReportService {
     @Override
     public List<UserScoreReport> getAllReports() {
         return reportMapper.selectList(null);
+    }
+
+    @Override
+    public List<String> getTodayReportUsers() {
+        String today = LocalDate.now().format(DateTimeFormatter.ofPattern("MM-dd"));
+
+        QueryWrapper<UserScoreReport> wrapper = new QueryWrapper<>();
+        wrapper.eq("report_date", today);
+
+        List<UserScoreReport> reports = reportMapper.selectList(wrapper);
+        return reports.stream()
+                .map(UserScoreReport::getUsername)
+                .filter(Objects::nonNull)
+                .map(String::trim)
+                .filter(name -> !name.isEmpty())
+                .distinct()
+                .collect(Collectors.toList());
     }
 }

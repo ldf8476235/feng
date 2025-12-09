@@ -7,4 +7,9 @@ public interface UserScoreReportService {
     void saveReport(UserScoreReport report);
     
     List<UserScoreReport> getAllReports();
+
+    /**
+     * 获取当日已提交报告的用户名列表
+     */
+    List<String> getTodayReportUsers();
 }

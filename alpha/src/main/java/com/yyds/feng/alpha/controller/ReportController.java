@@ -29,7 +29,14 @@ public class ReportController {
 
         UserScoreReport report = new UserScoreReport();
         report.setUsername(req.getUsername());
-        report.setSource(req.getSource());
+        Integer source = req.getSource();
+        if (Boolean.TRUE.equals(req.getAirdrop())) {
+            Integer defaultSource = userDefaultSourceService.getDefaultSource(req.getUsername());
+            if (defaultSource != null) {
+                source = defaultSource - 15;
+            }
+        }
+        report.setSource(source);
         report.setBalance(req.getBalance());
         report.setAirdrop(req.getAirdrop());
         // 透传前端指定的日期（如未传则在 service 中填充当天）
@@ -136,6 +143,12 @@ public class ReportController {
     public R getSource() {
         List<UserDefaultSource> sources = userDefaultSourceService.listAll();
         return R.ok(sources);
+    }
+
+    @GetMapping("/airdropList")
+    public R airdropList() {
+        List<String> users = reportService.getTodayReportUsers();
+        return R.ok(users);
     }
     
     @Data

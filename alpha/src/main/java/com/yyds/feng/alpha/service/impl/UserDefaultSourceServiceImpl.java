@@ -33,4 +33,17 @@ public class UserDefaultSourceServiceImpl implements UserDefaultSourceService {
     public List<UserDefaultSource> listAll() {
         return userDefaultSourceMapper.selectList(null);
     }
+
+    @Override
+    public Integer getDefaultSource(String username) {
+        if (username == null || username.trim().isEmpty()) {
+            return null;
+        }
+
+        QueryWrapper<UserDefaultSource> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("username", username.trim());
+
+        UserDefaultSource record = userDefaultSourceMapper.selectOne(queryWrapper);
+        return record != null ? record.getDefaultSource() : null;
+    }
 }
