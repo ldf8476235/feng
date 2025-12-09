@@ -117,23 +117,23 @@ public class OpinionService {
          * 1. 获取全部积分
          * ----------------------------------------------
          */
-        try {
-            String url = "https://proxy.opinion.trade:8443/api/bsc/api/v2/leaderboard/"
-                    + wallet + "?dataType=points&chainId=56";
-
-            String resp = fetchWithRetry(url);
-            if (resp != null) {
-                JSONObject obj = JSONObject.parseObject(resp).getJSONObject("result");
-
-                if (obj != null) {
-                    BigDecimal points = new BigDecimal(obj.getString("rankingValue"))
-                            .setScale(3, RoundingMode.HALF_UP);
-
-                    userDetail.put("totalPoints", points);
-                }
-            }
-        } catch (Exception ignore) {
-        }
+//        try {
+//            String url = "https://proxy.opinion.trade:8443/api/bsc/api/v2/leaderboard/"
+//                    + wallet + "?dataType=points&chainId=56&period=0";
+//
+//            String resp = fetchWithRetry(url);
+//            if (resp != null) {
+//                JSONObject obj = JSONObject.parseObject(resp).getJSONObject("result");
+//
+//                if (obj != null) {
+//                    BigDecimal points = new BigDecimal(obj.getString("rankingValue"))
+//                            .setScale(3, RoundingMode.HALF_UP);
+//
+//                    userDetail.put("totalPoints", points);
+//                }
+//            }
+//        } catch (Exception ignore) {
+//        }
 
         /*
          * ----------------------------------------------
@@ -180,36 +180,36 @@ public class OpinionService {
         String weekStr = redisTemplate.opsForValue().get("weekly:lastWeekNo");
         int lastWeek = (weekStr == null ? 6 : Integer.parseInt(weekStr));
         String keyLast = String.format("opinion:weekly:%s:%d", wallet, lastWeek);
-        try {
-            boolean needFetch = true;
-            if (redisTemplate.hasKey(keyLast)) {
-                Map<Object, Object> lastData = redisTemplate.opsForHash().entries(keyLast);
-                if (lastData.containsKey("deltaPoint")) {
-                    BigDecimal lastPoint = new BigDecimal((String) lastData.getOrDefault("deltaPoint", "0"));
-                    userDetail.put("lastPoint", lastPoint);
-                    needFetch = false;
-                }
-            }
-            if (needFetch) {
-                String url = "https://proxy.opinion.trade:8443/api/bsc/api/v2/leaderboard/"
-                        + wallet + "?dataType=points&chainId=56&period=7";
-
-                String resp = fetchWithRetry(url);
-                if (resp != null) {
-                    JSONObject obj = JSONObject.parseObject(resp).getJSONObject("result");
-
-                    if (obj != null) {
-                        BigDecimal points = new BigDecimal(obj.getString("rankingValue"))
-                                .setScale(3, RoundingMode.HALF_UP);
-
-                        userDetail.put("lastPoint", points);
-                        redisTemplate.opsForHash().put(keyLast, "deltaPoint", points.toString());
-                        redisTemplate.expire(keyLast, 7, TimeUnit.DAYS);
-                    }
-                }
-            }
-        } catch (Exception ignore) {
-        }
+//        try {
+//            boolean needFetch = true;
+//            if (redisTemplate.hasKey(keyLast)) {
+//                Map<Object, Object> lastData = redisTemplate.opsForHash().entries(keyLast);
+//                if (lastData.containsKey("deltaPoint")) {
+//                    BigDecimal lastPoint = new BigDecimal((String) lastData.getOrDefault("deltaPoint", "0"));
+//                    userDetail.put("lastPoint", lastPoint);
+//                    needFetch = false;
+//                }
+//            }
+//            if (needFetch) {
+//                String url = "https://proxy.opinion.trade:8443/api/bsc/api/v2/leaderboard/"
+//                        + wallet + "?dataType=points&chainId=56&period=7";
+//
+//                String resp = fetchWithRetry(url);
+//                if (resp != null) {
+//                    JSONObject obj = JSONObject.parseObject(resp).getJSONObject("result");
+//
+//                    if (obj != null) {
+//                        BigDecimal points = new BigDecimal(obj.getString("rankingValue"))
+//                                .setScale(3, RoundingMode.HALF_UP);
+//
+//                        userDetail.put("lastPoint", points);
+//                        redisTemplate.opsForHash().put(keyLast, "deltaPoint", points.toString());
+//                        redisTemplate.expire(keyLast, 7, TimeUnit.DAYS);
+//                    }
+//                }
+//            }
+//        } catch (Exception ignore) {
+//        }
         // 上周交易量 与 盈亏
         boolean needFetch = true;
         String resp = "";

@@ -1,4 +1,4 @@
-package com.yyds.feng.op.config;
+package com.yyds.feng.alpha.config;
 
 import com.yyds.feng.common.entity.ProxyInfo;
 import lombok.extern.slf4j.Slf4j;

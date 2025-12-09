@@ -87,6 +87,8 @@ public class OpController {
     @Data
     public static class WalletRequest {
         private List<String> wallets;
+        //1是周榜 2是总榜
+        private Integer type;
     }
 
     private String getClientIp(HttpServletRequest request) {
