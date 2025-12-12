@@ -9,6 +9,7 @@
         <module>vx</module>
         <module>op</module>
         <module>alpha</module>
+        <module>lighter</module>
     </modules>
     <parent>
         <groupId>org.springframework.boot</groupId>
