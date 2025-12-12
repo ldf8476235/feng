@@ -11,5 +11,7 @@ public class UserScoreReport {
     private Integer source;
     private Double balance;
     private Boolean airdrop;
+    /** 空投次数，默认 0 */
+    private Integer airdropCount;
     private String reportDate;   // MM-DD
 }

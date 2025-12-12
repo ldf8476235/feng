@@ -8,6 +8,7 @@ import com.yyds.feng.alpha.entity.UserScoreReport;
 import com.yyds.feng.alpha.service.AirdropCacheService;
 import com.yyds.feng.alpha.service.UserDefaultSourceService;
 import com.yyds.feng.alpha.service.UserScoreReportService;
+import com.yyds.feng.alpha.service.dto.UserAirdropInfo;
 import com.yyds.feng.common.util.R;
 import lombok.AccessLevel;
 import lombok.Data;
@@ -157,7 +158,7 @@ public class ReportController {
 
     @GetMapping("/airdropList")
     public R airdropList() {
-        List<String> reports = reportService.getTodayReportUsers();
+        List<UserAirdropInfo> reports = reportService.getTodayAirdropUsers();
         return R.ok(reports);
     }
 
