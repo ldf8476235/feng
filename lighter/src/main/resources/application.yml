@@ -1,0 +1,20 @@
+server:
+  port: 8084
+  servlet:
+    context-path: /lighter
+
+spring:
+  config:
+    import: classpath:common.yml
+  datasource:
+    url: jdbc:mysql://198.46.175.142:3306/lee?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: lee
+    password: Wsldf981126
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  main:
+    web-application-type: servlet
+
+mybatis-plus:
+  mapper-locations: classpath*:mapper/**/*.xml
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl

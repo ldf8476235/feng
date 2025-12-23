@@ -1,7 +1,6 @@
 package com.yyds.feng.alpha.controller;
 
 import com.alibaba.fastjson.JSONObject;
-import com.fasterxml.jackson.annotation.JsonSetter;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.yyds.feng.alpha.entity.UserDefaultSource;
 import com.yyds.feng.alpha.entity.UserScoreReport;
@@ -10,9 +9,7 @@ import com.yyds.feng.alpha.service.UserDefaultSourceService;
 import com.yyds.feng.alpha.service.UserScoreReportService;
 import com.yyds.feng.alpha.service.dto.UserAirdropInfo;
 import com.yyds.feng.common.util.R;
-import lombok.AccessLevel;
 import lombok.Data;
-import lombok.Setter;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -43,14 +40,14 @@ public class ReportController {
         UserScoreReport report = new UserScoreReport();
         report.setUsername(req.getUsername());
         Integer source = req.getSource();
-        boolean isAirdrop = req.isAirdropTrue();
-        if (isAirdrop) {
+        if (null == req.getAirdrop()) req.setAirdrop(0);
+        if (null != req.getAirdrop() && req.getAirdrop() == 1) {
             Integer defaultSource = userDefaultSourceService.getDefaultSource(req.getUsername());
             source = (defaultSource != null ? defaultSource : 17) - 15;
         }
         report.setSource(source);
         report.setBalance(req.getBalance());
-        report.setAirdrop(isAirdrop);
+        report.setAirdrop(req.getAirdrop());
         // 透传前端指定的日期（如未传则在 service 中填充当天）
         report.setReportDate(req.getReportDate());
 
@@ -180,44 +177,8 @@ public class ReportController {
         private String username;
         private Integer source;
         private Double balance;
-        @Setter(AccessLevel.NONE)
-        private Boolean airdrop;
+        private Integer airdrop;
         private String reportDate;
-
-        @JsonSetter("airdrop")
-        public void setAirdrop(Object airdrop) {
-            this.airdrop = convertToBoolean(airdrop);
-        }
-
-        public boolean isAirdropTrue() {
-            return Boolean.TRUE.equals(this.airdrop);
-        }
-
-        private Boolean convertToBoolean(Object value) {
-            if (value == null) {
-                return null;
-            }
-            if (value instanceof Boolean) {
-                return (Boolean) value;
-            }
-            if (value instanceof Number) {
-                return ((Number) value).intValue() == 1;
-            }
-            if (value instanceof CharSequence) {
-                String str = value.toString().trim();
-                if (str.isEmpty()) {
-                    return null;
-                }
-                if ("1".equals(str)) {
-                    return true;
-                }
-                if ("0".equals(str)) {
-                    return false;
-                }
-                return Boolean.parseBoolean(str);
-            }
-            return null;
-        }
     }
 
     @Data

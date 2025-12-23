@@ -23,7 +23,7 @@ public class UserScoreReportServiceImpl implements UserScoreReportService {
     @Override
     public void saveReport(UserScoreReport report) {
 
-        boolean isAirdropRequest = Boolean.TRUE.equals(report.getAirdrop());
+        boolean isAirdropRequest = report.getAirdrop() == 1 ? true : false;
 
         // 自动补充当天日期 MM-DD
         String targetDate;
@@ -42,21 +42,27 @@ public class UserScoreReportServiceImpl implements UserScoreReportService {
         UserScoreReport exist = reportMapper.selectOne(qw);
 
         if (exist != null) {
-            // 已存在 → 更新空投次数并覆盖其他字段
-            int existingCount = exist.getAirdropCount() == null ? 0 : exist.getAirdropCount();
-            int updatedCount = isAirdropRequest ? existingCount + 1 : existingCount;
+            if (isAirdropRequest) {
+                // 已存在 → 更新空投次数并覆盖其他字段
+                int existingCount = exist.getAirdropCount() == null ? 0 : exist.getAirdropCount();
+                int updatedCount = isAirdropRequest ? existingCount + 1 : existingCount;
 
-            report.setAirdropCount(updatedCount);
-            // airdrop 状态与次数保持一致
-            report.setAirdrop(updatedCount > 0);
-            report.setId(exist.getId());
-            report.setSource(report.getSource() - 15);
-            reportMapper.updateById(report);
+                report.setAirdropCount(updatedCount);
+                // airdrop 状态与次数保持一致
+                report.setAirdrop(report.getAirdrop());
+                report.setId(exist.getId());
+                report.setSource(exist.getSource() - 15);
+                reportMapper.updateById(report);
+            } else {
+                report.setId(exist.getId());
+                report.setSource(report.getSource());
+                reportMapper.updateById(report);
+            }
         } else {
             // 不存在 → 插入
             int initialCount = isAirdropRequest ? 1 : 0;
             report.setAirdropCount(initialCount);
-            report.setAirdrop(initialCount > 0);
+            report.setAirdrop(report.getAirdrop());
             reportMapper.insert(report);
         }
     }
