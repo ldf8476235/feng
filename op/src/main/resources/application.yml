@@ -21,4 +21,10 @@ mybatis-plus:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
 bsc:
-  rpc-url: https://1rpc.io/bnb
+  rpc-url: https://bsc-mainnet.nodereal.io/v1/e41e48d6f1d945c6bb400d521e4d9321
+  ws-url: wss://bsc-mainnet.nodereal.io/ws/v1/e41e48d6f1d945c6bb400d521e4d9321
+  start-block: 72210694
+  matcher-address: 0x5F45344126D6488025B0b84A3A8189F2487a7246
+  token-contract: 0x55d398326f99059fF775485246999027B3197955
+  token-decimals: 18
+  batch-size: 2000

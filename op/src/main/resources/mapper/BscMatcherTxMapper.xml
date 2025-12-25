@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.yyds.feng.op.mapper.BscMatcherTxMapper">
+    <insert id="insertBatchIgnore" parameterType="java.util.List">
+        INSERT IGNORE INTO bsc_matcher_tx(
+            tx_hash,
+            block_number,
+            block_time,
+            date,
+            address,
+            side,
+            value_amount
+        )
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (
+                #{item.txHash},
+                #{item.blockNumber},
+                #{item.blockTime},
+                #{item.date},
+                #{item.address},
+                #{item.side},
+                #{item.valueAmount}
+            )
+        </foreach>
+    </insert>
+</mapper>
