@@ -54,7 +54,7 @@ public class BscMatcherTxSyncService {
     private static final LocalTime DAY_CUTOFF = LocalTime.of(8, 0);
     private static final String SIDE_BUY = "BUY";
     private static final String SIDE_SELL = "SELL";
-    private static final int INSERT_BATCH_SIZE = 50;
+    private static final int INSERT_BATCH_SIZE = 1000;
 
     private final BscMatcherTxMapper txMapper;
     private final StringRedisTemplate redisTemplate;
@@ -341,11 +341,17 @@ public class BscMatcherTxSyncService {
     }
 
     private String formatBlockDate(LocalDateTime blockTime) {
-        LocalDateTime effectiveTime = blockTime != null ? blockTime : LocalDateTime.now(BLOCK_TIME_ZONE);
+        LocalDateTime effectiveTime = blockTime != null
+                ? blockTime
+                : LocalDateTime.now(BLOCK_TIME_ZONE);
+
         LocalDate date = effectiveTime.toLocalDate();
-        if (!effectiveTime.toLocalTime().isBefore(DAY_CUTOFF)) {
-            date = date.plusDays(1);
+
+        // 08:00 之前算前一天
+        if (effectiveTime.toLocalTime().isBefore(DAY_CUTOFF)) {
+            date = date.minusDays(1);
         }
+
         return DATE_FORMATTER.format(date);
     }
 
