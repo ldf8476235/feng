@@ -12,26 +12,26 @@ import java.util.List;
 @Service
 public class UserDefaultSourceVdServiceImpl implements UserDefaultSourceVdService {
 
-    @Resource
-    private UserDefaultSourceVdMapper userDefaultSourceMapper;
+    @Resource(name = "userDefaultSourceVdMapper")
+    private UserDefaultSourceVdMapper userDefaultSourceVdMapper;
 
     @Override
     public void saveDefaultSource(UserDefaultSourceVd source) {
         QueryWrapper<UserDefaultSourceVd> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("username", source.getUsername());
 
-        UserDefaultSourceVd exist = userDefaultSourceMapper.selectOne(queryWrapper);
+        UserDefaultSourceVd exist = userDefaultSourceVdMapper.selectOne(queryWrapper);
         if (exist != null) {
             source.setId(exist.getId());
-            userDefaultSourceMapper.updateById(source);
+            userDefaultSourceVdMapper.updateById(source);
         } else {
-            userDefaultSourceMapper.insert(source);
+            userDefaultSourceVdMapper.insert(source);
         }
     }
 
     @Override
     public List<UserDefaultSourceVd> listAll() {
-        return userDefaultSourceMapper.selectList(null);
+        return userDefaultSourceVdMapper.selectList(null);
     }
 
     @Override
@@ -43,7 +43,7 @@ public class UserDefaultSourceVdServiceImpl implements UserDefaultSourceVdServic
         QueryWrapper<UserDefaultSourceVd> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("username", username.trim());
 
-        UserDefaultSourceVd record = userDefaultSourceMapper.selectOne(queryWrapper);
+        UserDefaultSourceVd record = userDefaultSourceVdMapper.selectOne(queryWrapper);
         return record != null ? record.getDefaultSource() : null;
     }
 }
