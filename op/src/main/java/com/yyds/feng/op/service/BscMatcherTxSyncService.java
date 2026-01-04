@@ -11,11 +11,7 @@ import org.springframework.stereotype.Service;
 import org.web3j.crypto.Hash;
 import org.web3j.protocol.Web3j;
 import org.web3j.protocol.core.DefaultBlockParameter;
-import org.web3j.protocol.core.methods.response.EthBlock;
-import org.web3j.protocol.core.methods.response.EthBlockNumber;
-import org.web3j.protocol.core.methods.response.Log;
-import org.web3j.protocol.core.methods.response.Transaction;
-import org.web3j.protocol.core.methods.response.TransactionReceipt;
+import org.web3j.protocol.core.methods.response.*;
 import org.web3j.protocol.http.HttpService;
 import org.web3j.protocol.websocket.WebSocketService;
 import org.web3j.utils.Numeric;
@@ -27,19 +23,9 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.net.ConnectException;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneId;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -54,7 +40,7 @@ public class BscMatcherTxSyncService {
     private static final LocalTime DAY_CUTOFF = LocalTime.of(8, 0);
     private static final String SIDE_BUY = "BUY";
     private static final String SIDE_SELL = "SELL";
-    private static final int INSERT_BATCH_SIZE = 1000;
+    private static final int INSERT_BATCH_SIZE = 2000;
 
     private final BscMatcherTxMapper txMapper;
     private final StringRedisTemplate redisTemplate;
@@ -275,10 +261,11 @@ public class BscMatcherTxSyncService {
                 if (txMatched) {
                     matchedTxCount++;
                 }
-                if (!batch.isEmpty()) {
-                    txMapper.insertBatchIgnore(batch);
-                }
             }
+        }
+        if (!batch.isEmpty()) {
+            txMapper.insertBatchIgnore(batch);
+            batch.clear();
         }
         log.info("Transfer logs total: {}, matched tx: {}, matched logs: {} ({} - {})",
                 totalTransferLogCount, matchedTxCount, matchedLogCount, from, to);

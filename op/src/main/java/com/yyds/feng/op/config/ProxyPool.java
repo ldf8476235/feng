@@ -23,17 +23,26 @@ public class ProxyPool {
     public void init() {
         // 初始化代理列表
         String[] proxyConfigs = {
-                "82.22.89.210:7916:hgbgvnnv:2xqc2ff091er",
-                "82.22.73.91:7297:hgbgvnnv:2xqc2ff091er",
-                "82.22.89.24:7730:hgbgvnnv:2xqc2ff091er",
-                "82.22.69.75:7282:hgbgvnnv:2xqc2ff091er",
-                "82.22.89.122:7828:hgbgvnnv:2xqc2ff091er",
-                "82.22.93.246:7953:hgbgvnnv:2xqc2ff091er",
-                "82.22.89.195:7901:hgbgvnnv:2xqc2ff091er",
-                "82.22.93.219:7926:hgbgvnnv:2xqc2ff091er",
-                "82.22.93.3:7710:hgbgvnnv:2xqc2ff091er",
-                "82.22.69.89:7296:hgbgvnnv:2xqc2ff091er",
-                "82.22.69.208:7415:hgbgvnnv:2xqc2ff091er"
+                "2.59.149.205:44001:fzK6954c41616e77:ga6nrR82Hqb9wLKU0b"
+//                "82.22.89.194:7900:hgbgvnnv:2xqc2ff091er",
+//                "82.22.69.108:7315:hgbgvnnv:2xqc2ff091er",
+//                "82.22.89.83:7789:hgbgvnnv:2xqc2ff091er",
+//                "82.22.93.193:7900:hgbgvnnv:2xqc2ff091er",
+//                "82.22.89.10:7716:hgbgvnnv:2xqc2ff091er",
+//                "82.22.89.251:7957:hgbgvnnv:2xqc2ff091er",
+//                "82.22.89.127:7833:hgbgvnnv:2xqc2ff091er",
+//                "82.22.73.44:7250:hgbgvnnv:2xqc2ff091er",
+//                "82.22.89.35:7741:hgbgvnnv:2xqc2ff091er"
+//                "82.22.73.91:7297:hgbgvnnv:2xqc2ff091er",
+//                "82.22.89.24:7730:hgbgvnnv:2xqc2ff091er",
+//                "82.22.69.75:7282:hgbgvnnv:2xqc2ff091er",
+//                "82.22.89.122:7828:hgbgvnnv:2xqc2ff091er",
+//                "82.22.93.246:7953:hgbgvnnv:2xqc2ff091er",
+//                "82.22.89.195:7901:hgbgvnnv:2xqc2ff091er",
+//                "82.22.93.219:7926:hgbgvnnv:2xqc2ff091er",
+//                "82.22.93.3:7710:hgbgvnnv:2xqc2ff091er",
+//                "82.22.69.89:7296:hgbgvnnv:2xqc2ff091er",
+//                "82.22.69.208:7415:hgbgvnnv:2xqc2ff091er"
         };
 
         for (String config : proxyConfigs) {

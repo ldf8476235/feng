@@ -2,6 +2,7 @@ package com.yyds.feng.op.controller;
 
 import com.alibaba.fastjson.JSONObject;
 import com.yyds.feng.common.util.R;
+import com.yyds.feng.op.dto.WalletChristmasData;
 import com.yyds.feng.op.service.OpinionService;
 import com.yyds.feng.op.service.WalletStoreService;
 import lombok.Data;
@@ -91,6 +92,19 @@ public class OpController {
         redis.opsForValue().set(key, request.getAlias() != null ? request.getAlias() : "");
         log.info("Set wallet alias: {} -> {}", request.getWallet(), request.getAlias());
         return R.ok().put("message", "别名设置成功");
+    }
+
+    @PostMapping("/getChristmasData")
+    public R getChristmasData(@RequestBody WalletRequest request) {
+        List<String> wallets = (request != null && request.getWallets() != null)
+                ? request.getWallets()
+                : new ArrayList<>();
+        if (wallets.size() > 200) {
+            wallets = wallets.subList(0, 200);
+        }
+
+        List<WalletChristmasData> data = opinionService.fetchChristmasData(wallets);
+        return R.ok().put("data", data);
     }
 
     @GetMapping("/getWalletAlias")

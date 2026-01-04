@@ -26,4 +26,20 @@
             )
         </foreach>
     </insert>
+
+    <select id="selectDailySummaryByAddresses"
+            resultType="com.yyds.feng.op.dto.BscMatcherTxDailySummaryRow">
+        SELECT
+            address,
+            date,
+            COUNT(*) AS totalCount,
+            COALESCE(SUM(value_amount), 0) AS totalAmount
+        FROM bsc_matcher_tx
+        WHERE address IN
+        <foreach collection="addresses" item="addr" open="(" separator="," close=")">
+            #{addr}
+        </foreach>
+        GROUP BY address, date
+        ORDER BY address, date
+    </select>
 </mapper>

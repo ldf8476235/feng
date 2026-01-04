@@ -1,6 +1,10 @@
 package com.yyds.feng.op.service;
 
 import com.alibaba.fastjson.JSONObject;
+import com.yyds.feng.op.dto.BscMatcherTxDailySummary;
+import com.yyds.feng.op.dto.BscMatcherTxDailySummaryRow;
+import com.yyds.feng.op.dto.WalletChristmasData;
+import com.yyds.feng.op.mapper.BscMatcherTxMapper;
 import com.yyds.feng.op.utils.WeekUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,8 +19,12 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.Future;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -36,7 +44,12 @@ public class OpinionService {
     @Autowired
     private StringRedisTemplate redisTemplate;
 
+    @Autowired
+    private BscMatcherTxMapper bscMatcherTxMapper;
+
     private static final String BASE_URL = "https://proxy.opinion.trade:8443/api/bsc/api/v2/portfolio";
+    private static final String PROFILE_URL_PREFIX = "https://proxy.opinion.trade:8443/api/bsc/api/v2/user/";
+    private static final String MULTISIG_CACHE_PREFIX = "wallet:multisig:56:";
 
     public List<JSONObject> fetchWalletBatch(List<String> wallets) {
 
@@ -70,6 +83,123 @@ public class OpinionService {
         return result;
     }
 
+    public List<WalletChristmasData> fetchChristmasData(List<String> wallets) {
+        List<String> originalWallets = new ArrayList<>();
+        List<String> normalizedWallets = new ArrayList<>();
+        if (wallets != null) {
+            for (String wallet : wallets) {
+                if (wallet == null) {
+                    continue;
+                }
+                String trimmed = wallet.trim();
+                if (trimmed.isEmpty()) {
+                    continue;
+                }
+                originalWallets.add(trimmed);
+                normalizedWallets.add(trimmed.toLowerCase());
+            }
+        }
+        if (normalizedWallets.isEmpty()) {
+            return Collections.emptyList();
+        }
+
+        Set<String> uniqueWallets = new LinkedHashSet<>(normalizedWallets);
+        Map<String, String> mappedByWallet = resolveMappedWallets(uniqueWallets);
+        if (mappedByWallet.isEmpty()) {
+            return buildChristmasResponse(originalWallets, normalizedWallets, Collections.emptyMap());
+        }
+
+        Set<String> mappedAddresses = new LinkedHashSet<>(mappedByWallet.values());
+        if (mappedAddresses.isEmpty()) {
+            return buildChristmasResponse(originalWallets, normalizedWallets, mappedByWallet);
+        }
+
+        List<BscMatcherTxDailySummaryRow> rows =
+                bscMatcherTxMapper.selectDailySummaryByAddresses(new ArrayList<>(mappedAddresses));
+        Map<String, List<BscMatcherTxDailySummary>> summaryByAddress = groupDailySummary(rows);
+
+        return buildChristmasResponse(originalWallets, normalizedWallets, mappedByWallet, summaryByAddress);
+    }
+
+    private Map<String, String> resolveMappedWallets(Set<String> wallets) {
+        Map<String, String> result = new ConcurrentHashMap<>();
+        List<Future<?>> futures = new ArrayList<>();
+
+        for (String wallet : wallets) {
+            futures.add(walletExecutor.submit(() -> {
+                try {
+                    String mapped = resolveMappedWallet(wallet);
+                    if (mapped != null && !mapped.isEmpty()) {
+                        result.put(wallet, mapped);
+                    }
+                } catch (Exception e) {
+                    log.warn("resolve mapped wallet failed: {} - {}", wallet, e.getMessage());
+                }
+            }));
+        }
+
+        for (Future<?> future : futures) {
+            try {
+                future.get(30, TimeUnit.SECONDS);
+            } catch (Exception e) {
+                future.cancel(true);
+                log.error("resolve mapped wallet task error: {}", e.getMessage());
+            }
+        }
+        return result;
+    }
+
+    private Map<String, List<BscMatcherTxDailySummary>> groupDailySummary(List<BscMatcherTxDailySummaryRow> rows) {
+        Map<String, List<BscMatcherTxDailySummary>> grouped = new HashMap<>();
+        if (rows == null || rows.isEmpty()) {
+            return grouped;
+        }
+        for (BscMatcherTxDailySummaryRow row : rows) {
+            if (row == null || row.getAddress() == null) {
+                continue;
+            }
+            BscMatcherTxDailySummary summary = new BscMatcherTxDailySummary();
+            summary.setDate(row.getDate());
+            summary.setTotalCount(row.getTotalCount());
+            summary.setTotalAmount(row.getTotalAmount());
+            grouped.computeIfAbsent(row.getAddress(), key -> new ArrayList<>()).add(summary);
+        }
+        return grouped;
+    }
+
+    private List<WalletChristmasData> buildChristmasResponse(List<String> originalWallets,
+                                                             List<String> normalizedWallets,
+                                                             Map<String, String> mappedByWallet) {
+        return buildChristmasResponse(originalWallets, normalizedWallets, mappedByWallet, Collections.emptyMap());
+    }
+
+    private List<WalletChristmasData> buildChristmasResponse(List<String> originalWallets,
+                                                             List<String> normalizedWallets,
+                                                             Map<String, String> mappedByWallet,
+                                                             Map<String, List<BscMatcherTxDailySummary>> summaryByAddress) {
+        List<WalletChristmasData> result = new ArrayList<>();
+        if (originalWallets == null || originalWallets.isEmpty()
+                || normalizedWallets == null || normalizedWallets.isEmpty()) {
+            return result;
+        }
+        int size = Math.min(originalWallets.size(), normalizedWallets.size());
+        for (int i = 0; i < size; i++) {
+            String wallet = originalWallets.get(i);
+            String normalized = normalizedWallets.get(i);
+            WalletChristmasData item = new WalletChristmasData();
+            item.setWallet(wallet);
+            String mapped = mappedByWallet.get(normalized);
+            item.setMappedWallet(mapped);
+            if (mapped == null) {
+                item.setDaily(Collections.emptyList());
+            } else {
+                item.setDaily(summaryByAddress.getOrDefault(mapped, Collections.emptyList()));
+            }
+            result.add(item);
+        }
+        return result;
+    }
+
     private static final int MAX_RETRIES = 3;
     private static final int RETRY_DELAY_MS = 500;
 
@@ -93,6 +223,54 @@ public class OpinionService {
             }
         }
         return null;
+    }
+
+    private String resolveMappedWallet(String wallet) {
+        if (wallet == null || wallet.trim().isEmpty()) {
+            return null;
+        }
+        String normalizedWallet = wallet.trim().toLowerCase();
+        String cacheKey = MULTISIG_CACHE_PREFIX + normalizedWallet;
+        String cached = redisTemplate.opsForValue().get(cacheKey);
+        if (cached != null) {
+            return cached.isEmpty() ? null : cached;
+        }
+
+        String mapped = fetchMappedWalletFromApi(normalizedWallet);
+        if (mapped == null || mapped.trim().isEmpty()) {
+            return null;
+        }
+
+        String normalizedMapped = mapped.trim().toLowerCase();
+        redisTemplate.opsForValue().set(cacheKey, normalizedMapped);
+        return normalizedMapped;
+    }
+
+    private String fetchMappedWalletFromApi(String wallet) {
+        String url = PROFILE_URL_PREFIX + wallet + "/profile?&chainId=56";
+        try {
+            String resp = fetchWithRetry(url);
+            if (resp == null) {
+                return null;
+            }
+            JSONObject obj = JSONObject.parseObject(resp);
+            if (obj == null) {
+                return null;
+            }
+            JSONObject result = obj.getJSONObject("result");
+            if (result == null) {
+                return null;
+            }
+            JSONObject multiSigned = result.getJSONObject("multiSignedWalletAddress");
+            if (multiSigned == null) {
+                return null;
+            }
+            String mapped = multiSigned.getString("56");
+            return (mapped == null || mapped.trim().isEmpty()) ? null : mapped;
+        } catch (Exception e) {
+            log.warn("fetch mapped wallet from api failed: {} - {}", wallet, e.getMessage());
+            return null;
+        }
     }
 
     public JSONObject fetchWalletBatchWeb(String wallet) {
