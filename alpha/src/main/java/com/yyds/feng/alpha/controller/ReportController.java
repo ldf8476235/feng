@@ -317,6 +317,6 @@ public class ReportController {
     }
 
     private boolean isVd(String admin) {
-        return admin != null && "vd".equalsIgnoreCase(admin.trim());
+        return admin != null && "vendy".equalsIgnoreCase(admin.trim());
     }
 }

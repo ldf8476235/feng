@@ -10,6 +10,7 @@
         <module>op</module>
         <module>alpha</module>
         <module>lighter</module>
+        <module>crypto</module>
     </modules>
     <parent>
         <groupId>org.springframework.boot</groupId>

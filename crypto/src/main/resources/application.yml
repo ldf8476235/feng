@@ -1,0 +1,35 @@
+server:
+  port: 8888
+  servlet:
+    context-path: /crypto
+
+spring:
+  config:
+    import: classpath:common.yml
+  datasource:
+    url: jdbc:mysql://198.46.175.142:3306/lee?useUnicode=true&characterEncoding=UTF-8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: lee
+    password: Wsldf981126
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  main:
+    web-application-type: servlet
+
+mybatis-plus:
+  mapper-locations: classpath*:mapper/**/*.xml
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+crypto:
+  ws:
+    variational-url: wss://omni-ws-server.prod.ap-northeast-1.variational.io/prices
+    standx-url: wss://perps.standx.com/ws-stream/v1
+    standx-symbol: BTC-USD
+    standx-token: ${STANDX_TOKEN:}
+    variational-underlying: BTC
+    variational-instrument-type: perpetual_future
+    variational-settlement-asset: USDC
+    variational-funding-interval-sec: 3600
+    reconnect-delay-ms: 3000
+    ping-interval-sec: 30
+    variational-subscribe-interval-ms: 200
+    report-interval-ms: 200
